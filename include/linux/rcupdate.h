@@ -33,7 +33,7 @@
 #ifndef __LINUX_RCUPDATE_H
 #define __LINUX_RCUPDATE_H
 
-#include <linux/types.h>
+#include <linux/rcu_types.h>
 #include <linux/cache.h>
 #include <linux/spinlock.h>
 #include <linux/threads.h>
@@ -180,6 +180,12 @@ static inline int rcu_preempt_depth(void)
 }
 
 #endif /* #else #ifdef CONFIG_PREEMPT_RCU */
+/* Exported common interfaces */
+extern void rcu_barrier(void);
+extern void rcu_barrier_bh(void);
+extern void rcu_barrier_sched(void);
+extern void synchronize_sched_expedited(void);
+extern int sched_expedited_torture_stats(char *page);
 
 /* Internal to kernel */
 extern void rcu_sched_qs(int cpu);
