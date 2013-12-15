@@ -590,8 +590,8 @@ msm_rpm_regulator_init_data[] __devinitdata = {
 	RPM_LDO(L8,	 0, 1, 0, 2800000, 3000000, NULL,      0, 0),
 	RPM_LDO(L9,	 0, 1, 0, 3000000, 3000000, NULL,      0, 0),
 #endif
-	RPM_LDO(L10,	 0, 1, 0, 3000000, 3000000, NULL,      0, 0),
-#if defined(CONFIG_MACH_M2) || defined(CONFIG_MACH_APEXQ) || defined(CONFIG_MACH_EXPRESS) || defined(CONFIG_MACH_M2_DCM)
+	RPM_LDO(L10,	 0, 1, 0,  750000, 3000000, NULL,      0, 0),
+#if defined(CONFIG_MACH_M2) || defined(CONFIG_MACH_APEXQ) || defined(CONFIG_MACH_EXPRESS)
 	RPM_LDO(L11,	 0, 1, 0, 2800000, 3300000, NULL,      0, 0),
 #else
 	RPM_LDO(L11,	 0, 1, 0, 2850000, 2850000, NULL,      0, 0),
