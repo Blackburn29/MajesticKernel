@@ -869,8 +869,12 @@ static ssize_t touchkey_bln_control(struct device *dev,
 			cypress_touchkey_con_hw(info, true);
 
 		msleep(100);
+<<<<<<< HEAD
 		cypress_touchkey_brightness_set(&info->leds, LED_FULL);
 		enable_irq(info->irq);
+=======
+		cypress_touchkey_led_on(info);
+>>>>>>> d298491... cypress-touchkey: tweak BLN implementation
 	}
 	return size;
 }
@@ -1251,9 +1255,11 @@ static void cypress_touchkey_fb_suspend(struct early_suspend *h) {
 	struct cypress_touchkey_info *info =
 		container_of(h, struct cypress_touchkey_info, fb_suspend);
 
-#ifdef CONFIG_KEYBOARD_CYPRESS_TOUCH_BLN
-	if (bln_is_on)
-		return;
+#if defined(CONFIG_KEYBOARD_CYPRESS_TOUCH_BLN)
+	if (bln_is_on) {
+		bln_is_on = 0;
+		enable_irq(info->irq);
+	} else {
 #endif
 
 	wait_for_completion_timeout(&info->anim_done,
@@ -1267,6 +1273,10 @@ static void cypress_touchkey_fb_suspend(struct early_suspend *h) {
 			cypress_touchkey_con_hw(info, false);
 		info->power_onoff(0);
 	}
+
+#if defined(CONFIG_KEYBOARD_CYPRESS_TOUCH_BLN)
+ 	}
+ #endif
 }
 
 static void cypress_touchkey_fb_resume(struct early_suspend *h) {
