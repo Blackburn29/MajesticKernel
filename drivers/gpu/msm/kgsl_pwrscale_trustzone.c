@@ -76,6 +76,31 @@ static int __secure_tz_entry(u32 cmd, u32 val, u32 id)
 }
 #endif /* CONFIG_MSM_SCM */
 
+unsigned long window_time = 0;
+unsigned long sample_time_ms = 100;
+unsigned int up_threshold = 60;
+unsigned int down_threshold = 25;
+unsigned int up_differential = 10;
+bool debug = 0;
+unsigned long gpu_pref_counter;
+
+module_param(sample_time_ms, long, 0664);
+module_param(up_threshold, int, 0664);
+module_param(down_threshold, int, 0664);
+module_param(debug, bool, 0664);
+
+static struct clk_scaling_stats {
+	unsigned long total_time_ms;
+	unsigned long busy_time_ms;
+	unsigned long threshold;
+	unsigned int load;
+} gpu_stats = {
+	.total_time_ms = 0,
+	.busy_time_ms = 0,
+	.threshold = 0,
+	.load = 0,
+};
+
 static ssize_t tz_governor_show(struct kgsl_device *device,
 				struct kgsl_pwrscale *pwrscale,
 				char *buf)
