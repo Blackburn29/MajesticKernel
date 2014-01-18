@@ -112,10 +112,12 @@
 
 static struct device *cfg80211_parent_dev = NULL;
 struct wl_priv *wlcfg_drv_priv = NULL;
+#ifdef DEBUGFS_CFG80211
 #ifdef CUSTOMER_HW4
 u32 wl_dbg_level = WL_DBG_ERR | WL_DBG_P2P_ACTION;
 #else
 u32 wl_dbg_level = WL_DBG_ERR;
+#endif
 #endif
 
 #define MAX_WAIT_TIME 1500
@@ -10602,13 +10604,6 @@ int wl_cfg80211_do_driver_init(struct net_device *net)
 	return 0;
 }
 
-void wl_cfg80211_enable_trace(bool set, u32 level)
-{
-	if (set)
-		wl_dbg_level = level & WL_DBG_LEVEL;
-	else
-		wl_dbg_level |= (WL_DBG_LEVEL & level);
-}
 #if defined(WL_SUPPORT_BACKPORTED_KPATCHES) || (LINUX_VERSION_CODE >= KERNEL_VERSION(3, \
 	2, 0))
 static s32
