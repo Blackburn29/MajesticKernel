@@ -92,6 +92,12 @@ config MSM_KGSL_MMU_PAGE_FAULT
 	bool "Force the GPU MMU to page fault for unmapped regions"
 	default y
 
+config MSM_KGL_SIMPLE_GOV
+	bool "Simple governor for Qualcom Adreno devices"
+	default y
+	depends on MSM_KGSL
+	---help---
+	A simple KGSL GPU governor for Qualcom Adreno devices
 config MSM_KGSL_DISABLE_SHADOW_WRITES
 	bool "Disable register shadow writes for context switches"
 	default n
