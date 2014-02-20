@@ -3519,6 +3519,7 @@ dhd_attach(osl_t *osh, struct dhd_bus *bus, uint bus_hdrlen)
 	/* Initialize Wakelock stuff */
 	spin_lock_init(&dhd->wakelock_spinlock);
 	dhd->wakelock_counter = 0;
+	dhd->wl_timeout = jiffies;
 	wake_lock_init(&dhd->wl_wifi, WAKE_LOCK_SUSPEND, "wlan_wake");
 	init_timer_deferrable(&dhd->wl_timer);
 	dhd->wl_timer.function = _dhd_release_wakelock;
@@ -4895,8 +4896,10 @@ void dhd_detach(dhd_pub_t *dhdp)
 	if (dhd->dhd_state & DHD_ATTACH_STATE_WAKELOCKS_INIT) {
 #ifdef CONFIG_HAS_WAKELOCK
 		dhd->wakelock_counter = 0;
-		wake_lock_destroy(&dhd->wl_wifi);
 		del_timer_sync(&dhd->wl_timer);
+		if (wake_lock_active(&dhd->wl_wifi))
+			wake_unlock(&dhd->wl_wifi);
+		wake_lock_destroy(&dhd->wl_wifi);
 #endif /* CONFIG_HAS_WAKELOCK */
 	}
 }
@@ -5975,12 +5978,13 @@ static void _dhd_release_wakelock(unsigned long data)
 	spin_lock_irqsave(&dhd->wakelock_spinlock, flags);
 
 	delta = dhd->wl_timeout - jiffies;
-	if (!dhd->wakelock_counter && delta <= 0)
+	if (!dhd->wakelock_counter && delta <= 0) {
 		wake_unlock(&dhd->wl_wifi);
-	else if (likely(!timer_pending(&dhd->wl_timer))) {
+	} else if (likely(!timer_pending(&dhd->wl_timer))) {
 		dhd->wl_timer.expires = dhd->wl_timeout;
 		add_timer(&dhd->wl_timer);
 	}
+
 	spin_unlock_irqrestore(&dhd->wakelock_spinlock, flags);
 }
 /* wake_lock_timeout: no-op; wake_unlock() will kick off the timer later */
@@ -5989,9 +5993,15 @@ void dhd_int_wake_lock_timeout(dhd_info_t *dhd) { return; }
 /* timeout_enable: update wakelock expiry */
 void dhd_int_wake_timeout_enable(dhd_info_t *dhd, int val)
 {
+	if (!val)
+		return;
+
 	if (likely(dhd)) {
 		unsigned long flags;
 		long delta;
+
+		val = msecs_to_jiffies(val);
+
 		spin_lock_irqsave(&dhd->wakelock_spinlock, flags);
 
 		delta = dhd->wl_timeout - jiffies;
@@ -6026,19 +6036,24 @@ void dhd_int_wake_unlock(dhd_info_t *dhd)
 		unsigned long flags;
 		spin_lock_irqsave(&dhd->wakelock_spinlock, flags);
 
-		dhd->wakelock_counter--;
+		if (likely(dhd->wakelock_counter > 0))
+			dhd->wakelock_counter--;
+		else
+			goto skip_timer;
 
-		if (!dhd->wakelock_counter &&
-			unlikely(!timer_pending(&dhd->wl_timer))) {
+		if (!dhd->wakelock_counter) {
 			long delta = dhd->wl_timeout - jiffies;
-			if (likely(delta > 0)) {
-				dhd->wl_timer.expires = dhd->wl_timeout;
-				add_timer(&dhd->wl_timer);
+			if (delta > 0) {
+				if (unlikely(!timer_pending(&dhd->wl_timer))) {
+					dhd->wl_timer.expires = dhd->wl_timeout;
+					add_timer(&dhd->wl_timer);
+				}
 			} else {
 				wake_unlock(&dhd->wl_wifi);
 			}
 		}
 
+skip_timer:
 		spin_unlock_irqrestore(&dhd->wakelock_spinlock, flags);
 	}
 }
