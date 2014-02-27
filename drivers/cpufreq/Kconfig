@@ -78,6 +78,12 @@ config CPU_FREQ_DEFAULT_GOV_SMARTASS2
 	help
 	Use the CPUFreq governor 'smartassv2' as default.
 
+config CPU_FREQ_DEFAULT_GOV_SMARTASSH3
+	bool "smartassH3"
+	select CPU_FREQ_GOV_SMARTASSH3
+	help
+	Use the CPUFreq governor 'smartassH3' as default.
+
 config CPU_FREQ_DEFAULT_GOV_ASSWAX
 	bool "asswax"
 	select CPU_FREQ_GOV_ASSWAX
@@ -210,6 +216,12 @@ config CPU_FREQ_GOV_SMARTASS2
 	depends on CPU_FREQ
 	help
 	'smartassv2' - a smart governor
+
+config CPU_FREQ_GOV_SMARTASSH3
+	tristate "'smartassH3' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	'smartassH3' - a variant of smartassv2 aimed at better battery life.
 
 config CPU_FREQ_GOV_POWERSAVE
 	tristate "'powersave' governor"
