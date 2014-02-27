@@ -72,6 +72,12 @@ config CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND
 	help
 	Use the CPUFreq gov 'intellidemand' as default.
 
+config CPU_FREQ_DEFAULT_GOV_SMARTASS2
+	bool "smartassV2"
+	select CPU_FREQ_GOV_SMARTASS2
+	help
+	Use the CPUFreq governor 'smartassv2' as default.
+
 config CPU_FREQ_DEFAULT_GOV_ASSWAX
 	bool "asswax"
 	select CPU_FREQ_GOV_ASSWAX
@@ -198,6 +204,12 @@ config CPU_FREQ_GOV_ASSWAX
 	depends on CPU_FREQ
 	help
 	'asswax' - asstastic!
+
+config CPU_FREQ_GOV_SMARTASS2
+	tristate "'smartassV2' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	'smartassv2' - a smart governor
 
 config CPU_FREQ_GOV_POWERSAVE
 	tristate "'powersave' governor"
