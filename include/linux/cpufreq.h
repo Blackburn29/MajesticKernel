@@ -22,7 +22,8 @@
 #include <asm/div64.h>
 
 #define CPUFREQ_NAME_LEN 16
-
+#define MIN_FREQ_LIMIT 192000
+#define MAX_FREQ_LIMIT 1512000
 
 /*********************************************************************
  *                     CPUFREQ NOTIFIER INTERFACE                    *
