@@ -869,12 +869,9 @@ static ssize_t touchkey_bln_control(struct device *dev,
 			cypress_touchkey_con_hw(info, true);
 
 		msleep(100);
-<<<<<<< HEAD
 		cypress_touchkey_brightness_set(&info->leds, LED_FULL);
 		enable_irq(info->irq);
-=======
 		cypress_touchkey_led_on(info);
->>>>>>> d298491... cypress-touchkey: tweak BLN implementation
 	}
 	return size;
 }
@@ -925,7 +922,7 @@ static int __devinit cypress_touchkey_probe(struct i2c_client *client,
 	info->power_onoff = pdata->power_onoff;
 	info->touchkey_update_status = 0;
 	memcpy(info->keycode, pdata->touchkey_keycode,
-			sizeof(pdata->touchkey_keycode));
+			sizeof(*pdata->touchkey_keycode));
 	snprintf(info->phys, sizeof(info->phys),
 			"%s/input0", dev_name(&client->dev));
 	input_dev->name = "sec_touchkey";
