@@ -702,7 +702,6 @@ extern void set_gpu_vdd_levels(int uv_tbl[]);
 
 ssize_t show_vdd_levels_GPU(struct kobject *a, struct attribute *b, char *buf)
 {
-	int modu = 0;
 	return get_gpu_vdd_levels_str(buf);
 }
 

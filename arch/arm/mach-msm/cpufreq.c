@@ -62,19 +62,6 @@ struct cpu_freq {
 
 static DEFINE_PER_CPU(struct cpu_freq, cpu_freq_info);
 
-/**maxscroff**/
-static int __init cpufreq_read_arg_maxscroff(char *max_so)
-{
-    if (strcmp(max_so, "0") == 0) {
-        maxscroff = 0;
-        } else if (strcmp(max_so, "1") == 0) {
-            maxscroff = 1;
-        } else {
-        maxscroff = 0;
-        }
-     	return 1;
-}
-
 static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq)
 {
 	int ret = 0;
