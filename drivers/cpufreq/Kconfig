@@ -84,6 +84,22 @@ config CPU_FREQ_DEFAULT_GOV_SMARTASSH3
 	help
 	Use the CPUFreq governor 'smartassH3' as default.
 
+config CPU_FREQ_DEFAULT_GOV_PEGASUSQ
+	bool "pegasusq"
+	select CPU_FREQ_GOV_PEGASUSQ
+	help
+	Use the CPUFreq governor 'pegasusq' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SMARTMAX
+	bool "smartmax"
+	help
+	Use the CPUFreq governor 'smartmax' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SMARTMAX_EPS
+	bool "smartmax EPS"
+	help
+	Use the CPUFreq governor 'smartmax EPS' as default.
+
 config CPU_FREQ_DEFAULT_GOV_ASSWAX
 	bool "asswax"
 	select CPU_FREQ_GOV_ASSWAX
@@ -222,6 +238,20 @@ config CPU_FREQ_GOV_SMARTASSH3
 	depends on CPU_FREQ
 	help
 	'smartassH3' - a variant of smartassv2 aimed at better battery life.
+
+config CPU_FREQ_GOV_PEGASUSQ
+	tristate "'pegasusq' governor"
+	depends on CPU_FREQ
+	help
+	'pegasusq' - a samsung governor
+
+config CPU_FREQ_SMARTMAX
+	tristate "'smartmax' governor"
+	select CPU_FREQ_TABLE
+
+config CPU_FREQ_SMARTMAX_EPS
+	tristate "'smartmax EPS' governor"
+	select CPU_FREQ_TABLE
 
 config CPU_FREQ_GOV_POWERSAVE
 	tristate "'powersave' governor"
