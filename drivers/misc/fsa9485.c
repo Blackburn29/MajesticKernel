@@ -136,6 +136,8 @@
 #define	ADC_CARDOCK		0x1d
 #define	ADC_OPEN		0x1f
 
+extern int force_fast_charge;
+
 int uart_connecting;
 EXPORT_SYMBOL(uart_connecting);
 
