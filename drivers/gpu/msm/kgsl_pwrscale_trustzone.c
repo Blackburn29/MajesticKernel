@@ -94,11 +94,6 @@ static struct clk_scaling_stats {
 	unsigned long busy_time_ms;
 	unsigned long threshold;
 	unsigned int load;
-} gpu_stats = {
-	.total_time_ms = 0,
-	.busy_time_ms = 0,
-	.threshold = 0,
-	.load = 0,
 };
 
 static ssize_t tz_governor_show(struct kgsl_device *device,
@@ -132,10 +127,10 @@ static ssize_t tz_governor_store(struct kgsl_device *device,
 	if (!strncmp(buf, "ondemand", 8))
 		priv->governor = TZ_GOVERNOR_ONDEMAND;
 #ifdef CONFIG_MSM_KGSL_SIMPLE_GOV
-	else if (!strncmp(str, "simple", 6))
+	else if (!strncmp(buf, "simple", 6))
 		priv->governor = TZ_GOVERNOR_SIMPLE;
 #endif
-	else if (!strncmp(str, "performance", 11))
+	else if (!strncmp(buf, "performance", 11))
 		priv->governor = TZ_GOVERNOR_PERFORMANCE;
 
 	if (priv->governor == TZ_GOVERNOR_PERFORMANCE)
