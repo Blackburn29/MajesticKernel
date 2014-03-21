@@ -149,7 +149,6 @@
 #include "devices-msm8x60.h"
 #include "spm.h"
 #include "board-8960.h"
-#include "core.h"
 #include "pm.h"
 #include <mach/cpuidle.h>
 #include "rpm_resources.h"
@@ -1760,7 +1759,13 @@ static struct i2c_board_info mhl_i2c_board_info[] = {
 #endif
 
 #ifdef CONFIG_BATTERY_SEC
-static int is_sec_battery_using(void);
+static int is_sec_battery_using(void)
+{
+	if (system_rev >= 0x9)
+		return 1;
+	else
+		return 0;
+}
 
 int check_battery_type(void)
 {
@@ -1773,22 +1778,27 @@ static struct sec_bat_platform_data sec_bat_pdata = {
 	.get_cable_type	= msm8960_get_cable_type,
 	.sec_battery_using = is_sec_battery_using,
 	.check_batt_type = check_battery_type,
-	.iterm = 150,
-	.charge_duration = 6 * 60 * 60,
-	.wpc_charge_duration = 8 * 60 * 60,
-	.recharge_duration = 1.5 * 60 * 60,
+	.iterm = 100,
+	.charge_duration = 8 * 60 * 60,
+	.recharge_duration = 2 * 60 * 60,
 	.max_voltage = 4350 * 1000,
 	.recharge_voltage = 4280 * 1000,
 	.event_block = 600,
-	.high_block = 500,
-	.high_recovery = 450,
+#if defined(_d2usc_)
+	.high_block = 600,
+	.lpm_high_block = 600,
+#else
+	.high_block = 510,
+	.lpm_high_block = 470,
+#endif
+	.high_recovery = 440,
+	.high_recovery_wpc = 490,
 	.low_block = -50,
-	.low_recovery = 0,
-	.lpm_high_block = 480,
-	.lpm_high_recovery = 450,
-	.lpm_low_block = -50,
-	.lpm_low_recovery = 0,
-	.wpc_charging_current = 500,
+	.low_recovery = -10,
+	.lpm_high_recovery = 440,
+	.lpm_low_block = -40,
+	.lpm_low_recovery = -10,
+	.wpc_charging_current = 700,
 };
 
 static struct platform_device sec_device_battery = {
@@ -1797,15 +1807,10 @@ static struct platform_device sec_device_battery = {
 	.dev.platform_data = &sec_bat_pdata,
 };
 
-static int is_sec_battery_using(void)
+static void check_highblock_temp(void)
 {
 	if (system_rev < 0xd)
 		sec_bat_pdata.high_block = 600;
-
-	if (system_rev >= 0x9)
-		return 1;
-	else
-		return 0;
 }
 
 #endif /* CONFIG_BATTERY_SEC */
@@ -2082,8 +2087,21 @@ static struct platform_device opt_gp2a = {
 #endif
 #endif
 #ifdef CONFIG_MPU_SENSORS_MPU6050B1_411
+	struct mpu_platform_data mpu6050_data = {
+	.int_config = 0x10,
+	.orientation = {0, -1, 0,
+			1, 0, 0,
+			0, 0, 1},
+	.poweron = mpu_power_on,
+	};
+	/* compass */
+	static struct ext_slave_platform_data inv_mpu_ak8963_data = {
+	.bus		= EXT_SLAVE_BUS_PRIMARY,
+	.orientation = {0, 1, 0,
+			-1, 1, 0,
+			0, 0, 1},
+	};
 struct mpu_platform_data mpu6050_data;
-struct ext_slave_platform_data inv_mpu_ak8963_data;
 
 /* orientation */
 struct mpu_platform_data mpu6050_data_spr = {
@@ -2137,64 +2155,8 @@ static struct ext_slave_platform_data inv_mpu_ak8963_data_att = {
 #define SENSOR_MPU_NAME			"mpu6050B1"
 static struct mpu_platform_data mpu_data = {
 	.int_config = 0x12,
-	.orientation = {0, -1, 0,
-			1, 0, 0,
-			0, 0, 1},
-	/* accel */
-	.accel = {
-		  .get_slave_descr = mantis_get_slave_descr,
-		  .adapt_num = MSM_SNS_I2C_BUS_ID,
-		  .bus = EXT_SLAVE_BUS_SECONDARY,
-		  .address = 0x68,
-		  .orientation = {0, -1, 0,
-				  1, 0, 0,
-				  0, 0, 1},
-		  },
-	/* compass */
-	.compass = {
-		    .get_slave_descr = ak8975_get_slave_descr,
-		    .adapt_num = MSM_SNS_I2C_BUS_ID,
-		    .bus = EXT_SLAVE_BUS_PRIMARY,
-		    .address = 0x0C,
-		    .orientation = {0, 1, 0,
-				    -1, 0, 0,
-				    0, 0, 1},
-		    },
-	.poweron = mpu_power_on,
-};
-
-static struct mpu_platform_data mpu_data_01 = {
-	.int_config = 0x12,
-	.orientation = {0, -1, 0,
-			1, 0, 0,
-			0, 0, 1},
-	/* accel */
-	.accel = {
-		  .get_slave_descr = mantis_get_slave_descr,
-		  .adapt_num = MSM_SNS_I2C_BUS_ID,
-		  .bus = EXT_SLAVE_BUS_SECONDARY,
-		  .address = 0x68,
-		  .orientation = {0, -1, 0,
-				  1, 0, 0,
-				  0, 0, 1},
-		  },
-	/* compass */
-	.compass = {
-		    .get_slave_descr = ak8975_get_slave_descr,
-		    .adapt_num = MSM_SNS_I2C_BUS_ID,
-		    .bus = EXT_SLAVE_BUS_PRIMARY,
-		    .address = 0x0C,
-		    .orientation = {0, 1, 0,
-				    -1, 0, 0,
-				    0, 0, 1},
-		    },
-	.poweron = mpu_power_on,
-};
-
-static struct mpu_platform_data mpu_data_00 = {
-	.int_config = 0x12,
-	.orientation = {0, -1, 0,
-			-1, 0, 0,
+	.orientation = {1, 0, 0,
+			0, -1, 0,
 			0, 0, -1},
 	/* accel */
 	.accel = {
@@ -2202,8 +2164,8 @@ static struct mpu_platform_data mpu_data_00 = {
 		  .adapt_num = MSM_SNS_I2C_BUS_ID,
 		  .bus = EXT_SLAVE_BUS_SECONDARY,
 		  .address = 0x68,
-		  .orientation = {0, -1, 0,
-				  -1, 0, 0,
+		  .orientation = {1, 0, 0,
+				  0, -1, 0,
 				  0, 0, -1},
 		  },
 	/* compass */
@@ -2214,6 +2176,62 @@ static struct mpu_platform_data mpu_data_00 = {
 		    .address = 0x0C,
 		    .orientation = {1, 0, 0,
 				    0, 1, 0,
+				    0, 0, 1},
+		    },
+	.poweron = mpu_power_on,
+};
+
+static struct mpu_platform_data mpu_data_01 = {
+	.int_config = 0x12,
+	.orientation = {-1, 0, 0,
+			0, 1, 0,
+			0, 0, -1},
+	/* accel */
+	.accel = {
+		  .get_slave_descr = mantis_get_slave_descr,
+		  .adapt_num = MSM_SNS_I2C_BUS_ID,
+		  .bus = EXT_SLAVE_BUS_SECONDARY,
+		  .address = 0x68,
+		  .orientation = {-1, 0, 0,
+				  0, 1, 0,
+				  0, 0, -1},
+		  },
+	/* compass */
+	.compass = {
+		    .get_slave_descr = ak8975_get_slave_descr,
+		    .adapt_num = MSM_SNS_I2C_BUS_ID,
+		    .bus = EXT_SLAVE_BUS_PRIMARY,
+		    .address = 0x0C,
+		    .orientation = {1, 0, 0,
+				    0, 1, 0,
+				    0, 0, 1},
+		    },
+	.poweron = mpu_power_on,
+};
+
+static struct mpu_platform_data mpu_data_00 = {
+	.int_config = 0x12,
+	.orientation = {1, 0, 0,
+			0, 1, 0,
+			0, 0, 1},
+	/* accel */
+	.accel = {
+		  .get_slave_descr = mantis_get_slave_descr,
+		  .adapt_num = MSM_SNS_I2C_BUS_ID,
+		  .bus = EXT_SLAVE_BUS_SECONDARY,
+		  .address = 0x68,
+		  .orientation = {1, 0, 0,
+				  0, 1, 0,
+				  0, 0, 1},
+		  },
+	/* compass */
+	.compass = {
+		    .get_slave_descr = ak8975_get_slave_descr,
+		    .adapt_num = MSM_SNS_I2C_BUS_ID,
+		    .bus = EXT_SLAVE_BUS_PRIMARY,
+		    .address = 0x0C,
+		    .orientation = {0, -1, 0,
+				    1, 0, 0,
 				    0, 0, 1},
 		    },
 	.poweron = mpu_power_on,
@@ -3309,7 +3327,7 @@ static int msm_hsusb_vbus_power(bool on)
 
 static int phy_settings[] = {
 	0x44, 0x80,
-	0x7F, 0x81,
+	0x6F, 0x81,
 	0x3C, 0x82,
 	0x13, 0x83,
 	-1,
@@ -3512,7 +3530,32 @@ static uint8_t spm_power_collapse_with_rpm_krait_v3[] __initdata = {
 	0x24, 0x30, 0x0f,
 };
 
-static struct msm_spm_seq_entry msm_spm_seq_list[] __initdata = {
+static struct msm_spm_seq_entry msm_spm_boot_cpu_seq_list[] __initdata = {
+	[0] = {
+		.mode = MSM_SPM_MODE_CLOCK_GATING,
+		.notify_rpm = false,
+		.cmd = spm_wfi_cmd_sequence,
+	},
+
+	[1] = {
+		.mode = MSM_SPM_MODE_POWER_RETENTION,
+		.notify_rpm = false,
+		.cmd = spm_retention_cmd_sequence,
+	},
+
+	[2] = {
+		.mode = MSM_SPM_MODE_POWER_COLLAPSE,
+		.notify_rpm = false,
+		.cmd = spm_power_collapse_without_rpm,
+	},
+	[3] = {
+		.mode = MSM_SPM_MODE_POWER_COLLAPSE,
+		.notify_rpm = true,
+		.cmd = spm_power_collapse_with_rpm,
+	},
+};
+
+static struct msm_spm_seq_entry msm_spm_nonboot_cpu_seq_list[] __initdata = {
 	[0] = {
 		.mode = MSM_SPM_MODE_CLOCK_GATING,
 		.notify_rpm = false,
@@ -3551,8 +3594,8 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_0] = 0x0084009C,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_1] = 0x00A4001C,
 		.vctl_timeout_us = 50,
-		.num_modes = ARRAY_SIZE(msm_spm_seq_list),
-		.modes = msm_spm_seq_list,
+		.num_modes = ARRAY_SIZE(msm_spm_boot_cpu_seq_list),
+		.modes = msm_spm_boot_cpu_seq_list,
 	},
 	[1] = {
 		.reg_base_addr = MSM_SAW1_BASE,
@@ -3566,8 +3609,8 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_0] = 0x0084009C,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_1] = 0x00A4001C,
 		.vctl_timeout_us = 50,
-		.num_modes = ARRAY_SIZE(msm_spm_seq_list),
-		.modes = msm_spm_seq_list,
+		.num_modes = ARRAY_SIZE(msm_spm_nonboot_cpu_seq_list),
+		.modes = msm_spm_nonboot_cpu_seq_list,
 	},
 };
 
@@ -4103,7 +4146,7 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.gpio			= -1,
 		.active_low		= 1,
 		.wakeup			= 0,
-		.debounce_interval	= 12, /* ms */
+		.debounce_interval	= 5, /* ms */
 		.desc			= "Vol Up",
 	},
 	{
@@ -4112,7 +4155,7 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.gpio			= -1,
 		.active_low		= 1,
 		.wakeup			= 0,
-		.debounce_interval	= 12, /* ms */
+		.debounce_interval	= 5, /* ms */
 		.desc			= "Vol Down",
 	},
 	{
@@ -5293,6 +5336,9 @@ static void __init samsung_m2_init(void)
 #ifndef CONFIG_S5C73M3
 	spi_register_board_info(spi_board_info, ARRAY_SIZE(spi_board_info));
 #endif
+#ifdef CONFIG_BATTERY_SEC
+	check_highblock_temp();
+#endif /*CONFIG_BATTERY_SEC*/
 	msm8960_init_pmic();
 	msm8960_i2c_init();
 	msm8960_gfx_init();
