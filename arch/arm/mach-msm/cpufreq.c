@@ -32,6 +32,9 @@
 
 #include "acpuclock.h"
 
+unsigned int screen_off_max_freq;
+unsigned int screen_on_min_freq;
+
 struct cpufreq_work_struct {
 	struct work_struct work;
 	struct cpufreq_policy *policy;

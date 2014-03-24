@@ -411,9 +411,10 @@ extern struct cpufreq_governor cpufreq_gov_smartass_h3;
 extern struct cpufreq_governor cpufreq_gov_pegasusq;
 #define CPUFREQ_DEFAULT_GOVERNOR        (&cpufreq_gov_pegasusq)
 
-#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_SMARTMAX)
-extern struct cpufreq_governor cpufreq_gov_smartmax;
-#define CPUFREQ_DEFAULT_GOVERNOR        (&cpufreq_gov_smartmax)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMANDPLUS)
+extern struct cpufreq_governor cpufreq_gov_ondemandplus;
+#define CPUFREQ_DEFAULT_GOVERNOR        (&cpufreq_gov_ONDEMANDPLUS)
+
 #endif
 
 
@@ -455,5 +456,7 @@ void cpufreq_frequency_table_get_attr(struct cpufreq_frequency_table *table,
 
 void cpufreq_frequency_table_put_attr(unsigned int cpu);
 
+extern unsigned int screen_off_max_freq;
+extern unsigned int screen_on_min_freq;
 
 #endif /* _LINUX_CPUFREQ_H */
