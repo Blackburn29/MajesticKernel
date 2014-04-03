@@ -415,6 +415,9 @@ extern struct cpufreq_governor cpufreq_gov_pegasusq;
 extern struct cpufreq_governor cpufreq_gov_ondemandplus;
 #define CPUFREQ_DEFAULT_GOVERNOR        (&cpufreq_gov_ONDEMANDPLUS)
 
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_BADASS)
+extern struct cpufreq_governor cpufreq_gov_badass;
+#define CPUFREQ_DEFAULT_GOVERNOR        (&cpufreq_gov_badass)
 #endif
 
 

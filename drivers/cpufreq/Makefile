@@ -18,6 +18,7 @@ obj-$(CONFIG_CPU_FREQ_GOV_SMARTASS2)+= cpufreq_smartass2.o
 obj-$(CONFIG_CPU_FREQ_GOV_SMARTASSH3)+= cpufreq_smartassH3.o
 obj-$(CONFIG_CPU_FREQ_GOV_PEGASUSQ)+= cpufreq_pegasusq.o
 obj-$(CONFIG_CPU_FREQ_GOV_ONDEMANDPLUS)+= cpufreq_ondemandplus.o
+obj-$(CONFIG_CPU_FREQ_GOV_BADASS)+= cpufreq_badass.o
 # CPUfreq cross-arch helpers
 obj-$(CONFIG_CPU_FREQ_TABLE)		+= freq_table.o
 
